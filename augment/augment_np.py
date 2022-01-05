@@ -4,7 +4,6 @@ import argparse
 from constant import *
 import os
 
-
 parser = argparse.ArgumentParser(
     description='Create literals and append to graph'
 )
