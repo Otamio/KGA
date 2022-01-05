@@ -12,7 +12,7 @@ def get_data_lp(dataset):
     if dataset == "WikidataDWD":
         entities = pd.read_csv(f'data/{dataset}/train.txt', sep='\t', usecols=[0, 1, 2])
     else:
-        entities = pd.read_csv(f'data/{dataset}/valid.txt', sep='\t', header=None, usecols=[0, 1, 2])
+        entities = pd.read_csv(f'data/{dataset}/train.txt', sep='\t', header=None, usecols=[0, 1, 2])
     entities.columns = ['node1', 'label', 'node2']
 
     df = pd.read_csv(f'data/{dataset}/numerical_literals.txt', sep='\t', header=None, usecols=[0, 1, 2])
