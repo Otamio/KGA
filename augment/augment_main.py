@@ -27,20 +27,20 @@ def augment_lp(entities, df, dataset, mode, bins=None):
         (numeric_edges_processed, _, _), _, qnode_edges = create_new_edges(df, mode, bins)
 
         # Write the augmented version (without chain)
-        target = f'datasets/{dataset}/processed/{dataset}_{mapping_no_chain[mode]}_{suffix}'
+        target = f'data/{dataset}_{mapping_no_chain[mode]}_{suffix}'
         try_to_make_dir(target)
         pd.concat([entities, numeric_edges_processed]) \
             .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
-        shutil.copy(f'datasets/{dataset}/data/valid.tsv', f'{target}/valid.txt')
-        shutil.copy(f'datasets/{dataset}/data/test.tsv', f'{target}/test.txt')
+        shutil.copy(f'data/{dataset}/valid.txt', f'{target}/valid.txt')
+        shutil.copy(f'data/{dataset}/test.txt', f'{target}/test.txt')
 
         # Write the augmented version (with chain)
-        target = f'datasets/{dataset}/processed/{dataset}_{mapping_chain[mode]}_{suffix}'
+        target = f'data/{dataset}_{mapping_chain[mode]}_{suffix}'
         try_to_make_dir(target)
         pd.concat([entities, numeric_edges_processed, pd.DataFrame(qnode_edges)]) \
             .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
-        shutil.copy(f'datasets/{dataset}/data/valid.tsv', f'{target}/valid.txt')
-        shutil.copy(f'datasets/{dataset}/data/test.tsv', f'{target}/test.txt')
+        shutil.copy(f'data/{dataset}/valid.txt', f'{target}/valid.txt')
+        shutil.copy(f'data/{dataset}/test.txt', f'{target}/test.txt')
 
 
 def augment_np(entities, train, valid, test, dataset, mode, bins=None):
@@ -75,25 +75,21 @@ def augment_np(entities, train, valid, test, dataset, mode, bins=None):
                 train_edges_raw[train_edges_raw['label'] == property_]['node2'].median()
 
         # Write the original version
-        target = f'datasets/{dataset}/numeric/{dataset}_{mapping_no_chain[mode]}_{suffix}'
-        try_to_make_dir(target)
-        pd.concat([entities, train_edges_processed]) \
-            .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
-        valid_edges_processed.to_csv(f'{target}/valid.txt', sep='\t', header=False, index=False)
-        test_edges_processed.to_csv(f'{target}/test.txt', sep='\t', header=False, index=False)
-        valid_edges_raw.to_csv(f'{target}/valid_raw.txt', sep='\t', header=False, index=False)
-        test_edges_raw.to_csv(f'{target}/test_raw.txt', sep='\t', header=False, index=False)
-        with open(f'{target}/medians.dict', 'w+') as fd:
-            json.dump(medians_dict, fd, indent=2)
+        def generate_target(target, with_chain=False):
+            try_to_make_dir(target)
+            if not with_chain:
+                pd.concat([entities, train_edges_processed]) \
+                    .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
+            else:
+                pd.concat([entities, train_edges_processed, pd.DataFrame(qnode_edges)]) \
+                    .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
 
-        # Write the chaining version
-        target = f'datasets/{dataset}/numeric/{dataset}_{mapping_chain[mode]}_{suffix}'
-        try_to_make_dir(target)
-        pd.concat([entities, train_edges_processed, pd.DataFrame(qnode_edges)]) \
-            .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
-        valid_edges_processed.to_csv(f'{target}/valid.txt', sep='\t', header=False, index=False)
-        test_edges_processed.to_csv(f'{target}/test.txt', sep='\t', header=False, index=False)
-        valid_edges_raw.to_csv(f'{target}/valid_raw.txt', sep='\t', header=False, index=False)
-        test_edges_raw.to_csv(f'{target}/test_raw.txt', sep='\t', header=False, index=False)
-        with open(f'{target}/medians.dict', 'w+') as fd:
-            json.dump(medians_dict, fd, indent=2)
+            valid_edges_processed.to_csv(f'{target}/valid.txt', sep='\t', header=False, index=False)
+            test_edges_processed.to_csv(f'{target}/test.txt', sep='\t', header=False, index=False)
+            valid_edges_raw.to_csv(f'{target}/valid_raw.txt', sep='\t', header=False, index=False)
+            test_edges_raw.to_csv(f'{target}/test_raw.txt', sep='\t', header=False, index=False)
+            with open(f'{target}/medians.dict', 'w+') as fd:
+                json.dump(medians_dict, fd, indent=2)
+
+        generate_target(f'numeric/{dataset}_{mapping_no_chain[mode]}_{suffix}')
+        generate_target(f'numeric/{dataset}_{mapping_chain[mode]}_{suffix}', with_chain=True)
