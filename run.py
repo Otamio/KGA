@@ -47,12 +47,14 @@ if __name__ == "__main__":
                   "--edim 200 --rdim 200 --input_dropout 0.2 --hidden_dropout1 0.3 --feature_map_dropout 0.2 " \
                   f"--label_smoothing 0.1 --use_bias --input {args.input} --output {args.output}"
     elif model.startswith("transe"):
-        command = f"CUDA_VISIBLE_DEVICES={gpu} python -u rotate/run.py --do_train --cuda --do_valid --do_test " \
+        command = f"python rotate/create_mapping.py --dataset ablation/{dataset} && " \
+                  f"CUDA_VISIBLE_DEVICES={gpu} python -u rotate/run.py --do_train --cuda --do_valid --do_test " \
                   f"--data_path {args.input}/{dataset} --model {model} -n 256 -b 1024 -d 1000 -g 24.0 -a 1.0 -adv " \
                   f"-lr 0.0001 --max_steps 150000 --valid_steps 5000 -save {args.output}/{dataset}_{model} " \
                   "--test_batch_size 16"
     elif model.startswith("rotate"):
-        command = f"CUDA_VISIBLE_DEVICES={gpu} python -u rotate/run.py --do_train --cuda --do_valid --do_test " \
+        command = f"python rotate/create_mapping.py --dataset ablation/{dataset} && " \
+                  f"CUDA_VISIBLE_DEVICES={gpu} python -u rotate/run.py --do_train --cuda --do_valid --do_test " \
                   f"--data_path {args.input}/{dataset} --model {model} -n 256 -b 1024 -d 1000 -g 24.0 -a 1.0 -adv " \
                   f"-lr 0.0001 --max_steps 150000 --valid_steps 5000 -save {args.output}/{dataset}_{model} " \
                   "--test_batch_size 16 -de"
