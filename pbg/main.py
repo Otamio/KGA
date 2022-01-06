@@ -15,8 +15,6 @@ import torch
 import attr
 from torchbiggraph.config import parse_config
 from torchbiggraph.converters.importers import TSVEdgelistReader, convert_input_data
-from torchbiggraph.eval import do_eval
-from torchbiggraph.filtered_eval import FilteredRankingEvaluator
 from torchbiggraph.train import train
 from torchbiggraph.util import (
     SubprocessInitializer,
@@ -57,6 +55,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--dataset', default='fb15k237', help='Please provide a dataset path')
 parser.add_argument('--workers', default=24, help='Please provide the number of CPUs to run the job')
 parser.add_argument('--model', default='transe', help='Please provide the model to use')
+parser.add_argument('--input', default='data', help='Please provide the path to the input data')
+parser.add_argument('--output', default='out', help='Please provide the path to the output data')
 args = parser.parse_args()
 
 dataset = args.dataset
@@ -68,9 +68,9 @@ workers = args.workers
 # Adjust different method
 ######
 
-dataset_path = f"data/{dataset}"
-edges_path = f"data/{dataset}/edge"
-model_path = f"out/{dataset}/{args.model}"
+dataset_path = f"{args.input}/{dataset}"
+edges_path = f"{args.input}/{dataset}/edge"
+model_path = f"{args.output}/{dataset}/{args.model}"
 
 
 def get_torchbiggraph_config():
@@ -178,21 +178,6 @@ def main():
     # Do the Training here
     train(train_config, evaluator=None, subprocess_init=subprocess_init,
           valid_config=valid_config, test_config=test_config)
-    # validation_config = None, numeric_eval_config = None)
-    # do_eval(valid_config, evaluator=evaluator, subprocess_init=subprocess_init)
-    # do_eval(test_config, evaluator=evaluator, subprocess_init=subprocess_init)
-
-    '''
-    do_eval(valid_config, 
-            evaluator=FilteredRankingEvaluator(valid_config, filter_paths),
-            subprocess_init=subprocess_init
-           )
-
-    do_eval(test_config, 
-            evaluator=FilteredRankingEvaluator(test_config, filter_paths),
-            subprocess_init=subprocess_init
-           )
-    '''
 
 
 if __name__ == "__main__":
