@@ -69,7 +69,7 @@ workers = args.workers
 ######
 
 dataset_path = f"data/{dataset}"
-edges_path = f"out/{dataset}/edge"
+edges_path = f"data/{dataset}/edge"
 model_path = f"out/{dataset}/{args.model}"
 
 
