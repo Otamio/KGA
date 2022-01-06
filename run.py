@@ -65,7 +65,8 @@ if __name__ == "__main__":
             exit()
 
     else:
-        command = f"python pbg/main.py --model {args.model} --dataset {args.dataset}"
+        command = f"python pbg/main.py --model {args.model} --dataset {args.dataset} " \
+                  f"--input {args.input} --output {args.output}"
 
     if args.options == "dry-run":
         print(command)
