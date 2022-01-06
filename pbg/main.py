@@ -178,10 +178,11 @@ def main():
     evaluator = FilteredRankingEvaluator(test_config, filter_paths)
 
     # Do the Training here
-    train(train_config, evaluator=evaluator, subprocess_init=subprocess_init)
+    train(train_config, evaluator=evaluator, subprocess_init=subprocess_init,
+          valid_config=valid_config, test_config=test_config)
     # validation_config = None, numeric_eval_config = None)
-    do_eval(valid_config, evaluator=evaluator, subprocess_init=subprocess_init)
-    do_eval(test_config, evaluator=evaluator, subprocess_init=subprocess_init)
+    # do_eval(valid_config, evaluator=evaluator, subprocess_init=subprocess_init)
+    # do_eval(test_config, evaluator=evaluator, subprocess_init=subprocess_init)
 
     '''
     do_eval(valid_config, 
