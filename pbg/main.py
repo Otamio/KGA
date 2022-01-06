@@ -174,8 +174,6 @@ def main():
                                num_uniform_negs=0, num_batch_negs=0)
     test_config = attr.evolve(config, edge_paths=[output_test_path], relations=relations,
                               num_uniform_negs=0, num_batch_negs=0)
-    filter_paths = [output_test_path, output_valid_path, output_train_path]
-    evaluator = FilteredRankingEvaluator(test_config, filter_paths)
 
     # Do the Training here
     train(train_config, evaluator=None, subprocess_init=subprocess_init,
