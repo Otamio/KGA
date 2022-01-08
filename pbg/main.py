@@ -15,6 +15,7 @@ import torch
 import attr
 from torchbiggraph.config import parse_config
 from torchbiggraph.converters.importers import TSVEdgelistReader, convert_input_data
+from torchbiggraph.eval import do_eval
 from torchbiggraph.train import train
 from torchbiggraph.util import (
     SubprocessInitializer,
@@ -25,6 +26,8 @@ from torchbiggraph.util import (
 import os
 
 # remove the Issue: Initializing libiomp5.dylib, but found libiomp5.dylib already initialized.
+from numeric_eval_pbg import NumericMetricsReporter
+
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
@@ -57,6 +60,7 @@ parser.add_argument('--workers', default=24, help='Please provide the number of 
 parser.add_argument('--model', default='transe', help='Please provide the model to use')
 parser.add_argument('--input', default='data', help='Please provide the path to the input data')
 parser.add_argument('--output', default='out', help='Please provide the path to the output data')
+parser.add_argument('--eval_only', action='store_true', help="Whether to evaluate the current model only")
 args = parser.parse_args()
 
 dataset = args.dataset
@@ -173,8 +177,17 @@ def main():
     test_config = attr.evolve(config, edge_paths=[output_test_path], relations=relations,
                               num_uniform_negs=0, num_batch_negs=0)
     # Do the Training here
-    train(train_config, evaluator=None, subprocess_init=subprocess_init,
-          valid_config=valid_config, test_config=test_config)
+    if not args.eval_only:
+        train(train_config, evaluator=None, subprocess_init=subprocess_init,
+              valid_config=valid_config, test_config=test_config)
+    else:
+        if 'numeric' not in train_config.entity_path:
+            do_eval(test_config, evaluator=None, model=None,
+                    subprocess_init=subprocess_init)
+        else:
+            reporter = NumericMetricsReporter(test_config.checkpoint_path)
+            reporter.update_index()
+            reporter.report()
 
 
 if __name__ == "__main__":
