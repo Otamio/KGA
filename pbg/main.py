@@ -26,7 +26,7 @@ from torchbiggraph.util import (
 import os
 
 # remove the Issue: Initializing libiomp5.dylib, but found libiomp5.dylib already initialized.
-from numeric_eval_pbg import NumericMetricsReporter
+from torchbiggraph.numeric_eval_pbg import NumericMetricsReporter
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
