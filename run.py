@@ -12,6 +12,7 @@ parser.add_argument('--options', default='', help='Please provide additional ins
 parser.add_argument("--input", type=str, default="data", help="input path")
 parser.add_argument("--output", type=str, default="out", help="output path")
 parser.add_argument("--use_pbg", action="store_true", help="Use PyTorch-BigGraph to compute embedding")
+parser.add_argument("--workers", type=int, default=24, help="Set the number of workers for PBG")
 
 if __name__ == "__main__":
 
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 
     else:
         command = f"python pbg/main.py --model {args.model} --dataset {args.dataset} " \
-                  f"--input {args.input} --output {args.output}"
+                  f"--input {args.input} --output {args.output} --workers {args.workers}"
 
     if args.options == "dry-run":
         print(command)

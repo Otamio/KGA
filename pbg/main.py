@@ -60,9 +60,9 @@ parser.add_argument('--output', default='out', help='Please provide the path to 
 args = parser.parse_args()
 
 dataset = args.dataset
-dim, epochs = 200, 50
+dim, epochs = 200, 10
 method = args.model
-workers = args.workers
+workers = int(args.workers)
 
 ######
 # Adjust different method
@@ -172,7 +172,6 @@ def main():
                                num_uniform_negs=0, num_batch_negs=0)
     test_config = attr.evolve(config, edge_paths=[output_test_path], relations=relations,
                               num_uniform_negs=0, num_batch_negs=0)
-
     # Do the Training here
     train(train_config, evaluator=None, subprocess_init=subprocess_init,
           valid_config=valid_config, test_config=test_config)
