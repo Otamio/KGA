@@ -79,6 +79,7 @@ model_path = f"{args.output}/{dataset}/{args.model}"
 
 def get_torchbiggraph_config():
 
+    try_to_make_dir(f"{args.output}/{dataset}")
     try_to_make_dir(edges_path)
     try_to_make_dir(model_path)
 
