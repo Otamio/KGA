@@ -18,16 +18,18 @@ def try_to_make_dir(folder):
 ##########################################
 
 
-def augment_lp(entities, df, dataset, mode, bins=None):
+def augment_lp(entities, df, dataset, mode, bins=None, reverse=False):
     suffix = int(np.log2(bins)) if mode.endswith("Hierarchy") else bins
 
     if mode in CHAINABLE_MODE:
         print(f'Running mode {mode}')
 
-        (numeric_edges_processed, _, _), _, qnode_edges = create_new_edges(df, mode, bins)
+        (numeric_edges_processed, _, _), _, qnode_edges = create_new_edges(df, mode, bins, reverse=reverse)
 
         # Write the augmented version (without chain)
         target = f'data/{dataset}_{mapping_no_chain[mode]}_{suffix}'
+        if reverse:
+            target += "_reverse"
         try_to_make_dir(target)
         pd.concat([entities, numeric_edges_processed]) \
             .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
@@ -36,6 +38,8 @@ def augment_lp(entities, df, dataset, mode, bins=None):
 
         # Write the augmented version (with chain)
         target = f'data/{dataset}_{mapping_chain[mode]}_{suffix}'
+        if reverse:
+            target += "_reverse"
         try_to_make_dir(target)
         pd.concat([entities, numeric_edges_processed, pd.DataFrame(qnode_edges)]) \
             .to_csv(f'{target}/train.txt', sep='\t', header=False, index=False)
@@ -43,7 +47,7 @@ def augment_lp(entities, df, dataset, mode, bins=None):
         shutil.copy(f'data/{dataset}/test.txt', f'{target}/test.txt')
 
 
-def augment_np(entities, train, valid, test, dataset, mode, bins=None):
+def augment_np(entities, train, valid, test, dataset, mode, bins=None, reverse=False):
     suffix = int(np.log2(bins)) if mode.endswith("Hierarchy") else bins
 
     if mode in CHAINABLE_MODE:
@@ -52,7 +56,7 @@ def augment_np(entities, train, valid, test, dataset, mode, bins=None):
 
         (train_edges_processed, valid_edges_processed, test_edges_processed), \
             (train_edges_raw, valid_edges_raw, test_edges_raw), qnode_edges = \
-            create_new_edges(train, mode, bins, valid=valid, test=test)
+            create_new_edges(train, mode, bins, valid=valid, test=test, reverse=reverse)
 
         medians_dict = {}
         collections = defaultdict(list)
@@ -91,5 +95,12 @@ def augment_np(entities, train, valid, test, dataset, mode, bins=None):
             with open(f'{target}/medians.dict', 'w+') as fd:
                 json.dump(medians_dict, fd, indent=2)
 
-        generate_target(f'numeric/{dataset}_{mapping_no_chain[mode]}_{suffix}')
-        generate_target(f'numeric/{dataset}_{mapping_chain[mode]}_{suffix}', with_chain=True)
+        target = f'numeric/{dataset}_{mapping_no_chain[mode]}_{suffix}'
+        if reverse:
+            target += "_reverse"
+        generate_target(target)
+
+        target = f'numeric/{dataset}_{mapping_chain[mode]}_{suffix}'
+        if reverse:
+            target += "_reverse"
+        generate_target(target, with_chain=True)

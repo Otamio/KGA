@@ -141,7 +141,7 @@ def create_numeric_edges(df_sli, bins, qnodes_collect, suffix=""):
 ##########################################
 
 def generate_edges_single(train, property_, num_bins=None, unit=None, mode='Quantile_Single',
-                          valid=None, test=None):
+                          valid=None, test=None, reverse=False):
     """
     Generate a 1D partition of literal nodes and add them to entity nodes
     """
@@ -150,7 +150,7 @@ def generate_edges_single(train, property_, num_bins=None, unit=None, mode='Quan
     qnodes_collect, qnodes_label_edges = create_literal_labels(bins, property_)
 
     # Connect with quantity nodes
-    qnode_chain = create_chain(qnodes_collect, property_, reverse_chain=False)
+    qnode_chain = create_chain(qnodes_collect, property_, reverse_chain=reverse)
     # Generate the pnodes
     pnodes_collect, pnodes_edges, pnodes_label_edges = create_property_labels(property_, unit)
     # Generate numeric edges
@@ -163,7 +163,7 @@ def generate_edges_single(train, property_, num_bins=None, unit=None, mode='Quan
 
 
 def generate_edges_overlapping(train, property_, num_bins=None, unit=None, mode='Quantile_Overlap',
-                               valid=None, test=None):
+                               valid=None, test=None, reverse=False):
     def compute_numeric_edges(df, bins_a, bins_b, qnodes_collect_a, qnodes_collect_b):
         if df is None:
             return None
@@ -189,7 +189,7 @@ def generate_edges_overlapping(train, property_, num_bins=None, unit=None, mode=
     if len(qnodes_collect_a) > len(qnodes_collect_b):
         qnodes_collect_all += qnodes_collect_a[len(qnodes_collect_b):]
 
-    qnode_chain = create_chain(qnodes_collect_all, property_, reverse_chain=False)
+    qnode_chain = create_chain(qnodes_collect_all, property_, reverse_chain=reverse)
 
     pnodes_collect, pnodes_edges, pnodes_label_edges = create_property_labels(property_, unit)
 
@@ -202,7 +202,7 @@ def generate_edges_overlapping(train, property_, num_bins=None, unit=None, mode=
 
 
 def generate_edges_hierarchy(train, property_, levels=3, unit=None, mode='Quantile_Hierarchy',
-                             valid=None, test=None):
+                             valid=None, test=None, reverse=False):
     """
     Link Hierarchy
     """
@@ -230,13 +230,12 @@ def generate_edges_hierarchy(train, property_, levels=3, unit=None, mode='Quanti
 
     qnode_chain_list = list()
     for lv in range(levels + 1):
-        qnode_chain_list.append(create_chain(qnodes_collect_list[lv], property_, reverse_chain=False))
+        qnode_chain_list.append(create_chain(qnodes_collect_list[lv], property_, reverse_chain=reverse))
     for lv in range(levels - 1):
         qnode_chain_list.append(create_hierarchy(qnodes_collect_list[lv], qnodes_collect_list[lv + 1],
-                                                 property_, reverse_relation=False))
+                                                 property_, reverse_relation=reverse))
 
     pnodes_collect, pnodes_edges, pnodes_label_edges = create_property_labels(property_, unit)
-
 
     qnode_chain = reduce(lambda x, y: x + y, qnode_chain_list)
     qnodes_label_edges = reduce(lambda x, y: x + y, qnodes_label_edges_list)
@@ -252,7 +251,7 @@ def generate_edges_hierarchy(train, property_, levels=3, unit=None, mode='Quanti
 #    Edge Creation Functions
 ##########################################
 
-def create_new_edges(train, mode, num_bins=None, valid=None, test=None):
+def create_new_edges(train, mode, num_bins=None, valid=None, test=None, reverse=False):
     """
     Create the new edges based on the partitioned data
     """
@@ -275,15 +274,18 @@ def create_new_edges(train, mode, num_bins=None, valid=None, test=None):
             if mode.endswith("Single"):
                 assert(num_bins is not None)
                 a, b, c, d, e = generate_edges_single(sli_train, property_, num_bins=num_bins,
-                                                      unit=None, mode=mode, valid=sli_valid, test=sli_test)
+                                                      unit=None, mode=mode, valid=sli_valid, test=sli_test,
+                                                      reverse=reverse)
             elif mode.endswith("Overlap"):
                 assert(num_bins is not None)
                 a, b, c, d, e = generate_edges_overlapping(sli_train, property_, num_bins=num_bins,
-                                                           unit=None, mode=mode, valid=sli_valid, test=sli_test)
+                                                           unit=None, mode=mode, valid=sli_valid, test=sli_test,
+                                                           reverse=reverse)
             elif mode.endswith("Hierarchy"):
                 assert(num_bins is not None)
                 a, b, c, d, e = generate_edges_hierarchy(sli_train, property_, levels=int(np.log2(num_bins)),
-                                                         unit=None, mode=mode, valid=sli_valid, test=sli_test)
+                                                         unit=None, mode=mode, valid=sli_valid, test=sli_test,
+                                                         reverse=reverse)
             else:
                 print("Unsupported data type!")
                 continue

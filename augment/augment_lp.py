@@ -14,6 +14,8 @@ parser.add_argument('--mode', default='All', metavar='',
                     help='which augmentation mode to run?')
 parser.add_argument('--bins', default='8', metavar='',
                     help='How many bins to run?')
+parser.add_argument('--reverse', action="store_true",
+                    help='Whether to create reverse relations in the dataset?')
 args = parser.parse_args()
 
 # Read configuration
@@ -30,4 +32,4 @@ entities, values = get_data_lp(dataset)
 
 for mode in modes:
     if mode in SUPPORTED_MODE:
-        augment_lp(entities, values, dataset, mode, bins)
+        augment_lp(entities, values, dataset, mode, bins, args.reverse)

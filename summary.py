@@ -44,7 +44,7 @@ def parse_tucker(args):
                     if line.startswith("Validation at"):
                         if len(test) > 0:
                             result.append(EpocResult(epoc, convert_result(valid), convert_result(test)))
-                        valid, test = {}, {}
+                            valid, test = {}, {}
                         current = valid
                         epoc = int(line.split()[-1])
                     if line.startswith("Test at"):
@@ -112,14 +112,57 @@ def parse_rotate(args):
     return results
 
 
+def parse_pbg(args):
+    results = {}
+    for fname in glob.iglob(f"{args.path}/*{args.dataset}/{args.model}*/{args.model}*.log"):
+        try:
+            with open(fname) as fd:
+                epoc = 0
+                result = []
+                valid, test = {}, {}
+                for line in fd:
+                    try:
+                        line = line.split('INFO:')[1].strip()
+                        if len(line) == 0:
+                            continue
+                    except IndexError:
+                        continue
+                    if line.startswith("Finished epoch"):
+                        epoc = int(line.split('Finished epoch')[1].split('/')[0])
+                    if line.startswith("Stats: loss:"):
+                        line = line[6:].strip()
+                        values = list(map(lambda x: float(x.split(':')[1]), line.split(',')))
+                        if len(test) > 0:
+                            result.append(EpocResult(epoc, convert_result(valid), convert_result(test)))
+                            valid, test = {}, {}
+                        if len(valid) == 0:
+                            _, valid["mr"], valid["mrr"], valid["hits@1"], valid["hits@10"], _, _, _ = values
+                            valid["hits@3"] = 0.0
+                        else:
+                            _, test["mr"], test["mrr"], test["hits@1"], test["hits@10"], _, _, _ = values
+                            test["hits@3"] = 0.0
+                result.append(EpocResult(epoc, convert_result(valid), convert_result(test)))
+            results[fname.split('/')[1].split('.')[0].strip() + '_' + fname.split('/')[-2]] = result
+        except KeyError as e:
+            print("Error:", fname, e)
+            pass
+    return results
+
+
 def main():
 
     args = parser.parse_args()
-    results_rotate = parse_rotate(args)
-    results_tucker = parse_tucker(args)
+    if 'DWD' not in args.dataset:
+        results_rotate = parse_rotate(args)
+        results_tucker = parse_tucker(args)
+        results_pbg = {}
+    else:
+        results_rotate = {}
+        results_tucker = {}
+        results_pbg = parse_pbg(args)
 
     frame = []
-    for idx, result in enumerate([results_rotate, results_tucker]):
+    for idx, result in enumerate([results_rotate, results_tucker, results_pbg]):
         try:
             for exp, res in sorted(result.items()):
                 best = max(res)
@@ -133,7 +176,8 @@ def main():
         except ValueError:
             print("Cannot process out:", exp)
 
-    print(pd.DataFrame(frame).sort_values(by=["mrr", "hits@1", "hits@10"], ascending=False))
+    if len(frame) > 0:
+        print(pd.DataFrame(frame).sort_values(by=["mrr", "hits@1", "hits@10"], ascending=False))
 
 
 if __name__ == "__main__":
