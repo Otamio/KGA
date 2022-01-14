@@ -114,7 +114,7 @@ def parse_rotate(args):
 
 def parse_pbg(args):
     results = {}
-    for fname in glob.iglob(f"{args.path}/*{args.dataset}/{args.model}*/{args.model}*.log"):
+    for fname in glob.iglob(f"{args.path}/*{args.dataset}*/{args.model}*/{args.model}*.log"):
         try:
             with open(fname) as fd:
                 epoc = 0
@@ -163,21 +163,23 @@ def main():
 
     frame = []
     for idx, result in enumerate([results_rotate, results_tucker, results_pbg]):
-        try:
-            for exp, res in sorted(result.items()):
+        for exp, res in sorted(result.items()):
+            try:
                 best = max(res)
+                exp, model = exp.rsplit('_', 1)
                 frame.append({
-                    "experiment": exp,
+                    "dataset": exp,
+                    "model": model,
                     "best_epoc": best.epoc // 100 if idx == 0 else best.epoc,
                     "mrr": round(best.test.mrr, 3),
                     "hits@1": round(best.test.hits_1, 3),
                     "hits@10": round(best.test.hits_10, 3)
                 })
-        except ValueError:
-            print("Cannot process out:", exp)
+            except ValueError:
+                print("Cannot process out:", exp)
 
     if len(frame) > 0:
-        print(pd.DataFrame(frame).sort_values(by=["mrr", "hits@1", "hits@10"], ascending=False))
+        print(pd.DataFrame(frame).sort_values(by=["model", "mrr", "hits@1", "hits@10"], ascending=False))
 
 
 if __name__ == "__main__":

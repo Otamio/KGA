@@ -64,7 +64,7 @@ parser.add_argument('--eval_only', action='store_true', help="Whether to evaluat
 args = parser.parse_args()
 
 dataset = args.dataset
-dim, epochs = 200, 10
+dim, epochs = 200, 4
 method = args.model
 workers = int(args.workers)
 
@@ -113,6 +113,7 @@ def get_torchbiggraph_config():
         num_uniform_negs=1000,
         loss_fn="softmax",
         lr=0.1,
+        relation_lr=0.01,
         regularization_coef=1e-3,
         # Evaluation during training
         eval_fraction=0,  # to reproduce results, we need to use all training data
