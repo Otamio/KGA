@@ -29,3 +29,5 @@ The directory also contains the scripts which are deemed as the entry point of r
    2. To run link prediction on the dataset with PyTorch-BigGraph: `python run.py --dataset {dataset} --model {model} --use_pbg`
    3. Of course, you can change the input folder if you save the augmented graphs in other locations. You can also change the output folder if needed. To run numeric prediction on the dataset: `python run.py --dataset {dataset} --model {model} --input {input_path} --output {output_path}`.
 2. `run_batch.py` is the wrapper for run.py if user wants to run all six base models for an input graphs.
+3. `summary.py` is the script to collect best results from the logs. Users can  run the program using `python summary.py --dataset {dataset} --model {model}` to get the best metric for a given model. The program will run through all iterations of the log files and print the metrics of the epoch with best `validation MRR`. The results will be ordered by model (if user does not specify a model), mrr, hits@1 and finally hits@10.
+4. `summary.py` 

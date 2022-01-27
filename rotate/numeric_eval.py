@@ -16,6 +16,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--model', default='rotate', help='Please provide a model to run')
 parser.add_argument('--dataset', default='fb15k237', help='Please provide a dataset path')
 parser.add_argument('--gpu', default='0', help='Please provide a gpu to assign the task')
+parser.add_argument('--input', default='numeric', help='Please provide an input path')
+
 
 mapping = {
     "transe": "TransE",
@@ -72,8 +74,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
-    target_src = f'numeric/{args.dataset}'
-    target_dst = f'numeric/{args.dataset}_{args.model}'
+    target_src = f'{args.input}/{args.dataset}'
+    target_dst = f'{args.input}/{args.dataset}_{args.model}'
 
     with open(os.path.join(target_src, 'entities.dict')) as fin:
         ent2idx = dict()
