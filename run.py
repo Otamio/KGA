@@ -14,6 +14,7 @@ parser.add_argument("--output", type=str, default="out", help="output path")
 parser.add_argument("--use_pbg", action="store_true", help="Use PyTorch-BigGraph to compute embedding")
 parser.add_argument("--eval_only", action="store_true", help="Whether to evaluate the current model only")
 parser.add_argument("--workers", type=int, default=24, help="Set the number of workers for PBG")
+parser.add_argument("--save_best", action="store_true", help="Store the best embedding among evaluated epochs")
 
 if __name__ == "__main__":
 
@@ -75,4 +76,6 @@ if __name__ == "__main__":
     if args.options == "dry-run":
         print(command)
     else:
+        if args.save_best:
+            command += " --save_best"
         subprocess.run(command, shell=True)
